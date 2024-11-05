@@ -3,13 +3,13 @@ const { Pool } = require('pg');
 const cors = require('cors');
 
 const app = express();
-const port = process.env.PORT || 5000;  // Use environment variable for the port
+const port = process.env.PORT || 5000; 
 
 // PostgreSQL connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false,  // Required for Render's managed PostgreSQL
+    rejectUnauthorized: false, 
   },
 });
 
@@ -24,8 +24,7 @@ app.get('/', (req, res) => {
 // Create song
 app.post('/songs', async (req, res) => {
   const { name, artist, album, poster, preview_url } = req.body;
-  
-  // Log the incoming request body
+
   console.log('Request body:', req.body);
 
   if (!name || !artist || !album || !poster || !preview_url) {
@@ -44,6 +43,7 @@ app.post('/songs', async (req, res) => {
   }
 });
 
+// Update song
 app.put('/songs/:id', async (req, res) => {
   const { id } = req.params;
   const { name, artist, preview_url, poster } = req.body;
@@ -72,19 +72,15 @@ app.put('/songs/:id', async (req, res) => {
     values.push(poster);
   }
 
-  // If no fields are provided, respond with an error
   if (fieldsToUpdate.length === 0) {
     return res.status(400).json({ error: 'No fields to update' });
   }
 
-  // Create the SQL query dynamically
   const query = `UPDATE songs SET ${fieldsToUpdate.join(', ')} WHERE id = $${index} RETURNING *`;
   values.push(id);
 
   try {
     const result = await pool.query(query, values);
-
-    // Check if the song was found and updated
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Song not found' });
     }
@@ -101,12 +97,9 @@ app.delete('/songs/:id', async (req, res) => {
   const { id } = req.params;
   try {
     const result = await pool.query('DELETE FROM songs WHERE id = $1', [id]);
-
-    // Check if the song was found and deleted
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Song not found' });
     }
-
     res.status(204).send();
   } catch (error) {
     console.error('Error deleting song:', error);
