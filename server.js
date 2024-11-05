@@ -3,15 +3,14 @@ const { Pool } = require('pg');
 const cors = require('cors');
 
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000;  // Use environment variable for the port
 
 // PostgreSQL connection
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'music_app',
-  password: 'postgres',
-  port: 5433,
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,  // Required for Render's managed PostgreSQL
+  },
 });
 
 app.use(cors());
@@ -96,7 +95,6 @@ app.put('/songs/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 
 // Delete song
 app.delete('/songs/:id', async (req, res) => {
